@@ -16,7 +16,7 @@ export function getScales(data) {
   const colorScale = d3
     .scaleQuantize()
     .domain([0, 40])
-    .range(d3.schemeSpectral[11].slice(0, 11).reverse());
+    .range(d3.schemeSpectral[11].slice().reverse());
 
   return { yearScale, monthScale, colorScale };
 }

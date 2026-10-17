@@ -74,10 +74,7 @@ export function drawLegend(svg, colorScale) {
   const [minTemp, maxTemp] = colorScale.domain();
   const legend = svg
     .append("g")
-    .attr(
-      "transform",
-      `translate(${width - margin.right + margin.right / 2}, ${margin.top})`,
-    );
+    .attr("transform", `translate(${width - margin.right / 2}, ${margin.top})`);
 
   // One swatch per quantized color, stacked cold (top) to hot (bottom)
   const colors = colorScale.range();

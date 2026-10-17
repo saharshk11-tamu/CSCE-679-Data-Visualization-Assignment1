@@ -1,10 +1,50 @@
 // Level 2: mini line charts of daily max/min temperatures inside each cell.
+import { miniChartPadding } from "./config.js";
 
 // Draw one mini chart per month, on top of the heatmap cells.
-// TODO:
-//   - one <g> per month, translated to the cell's x/y (like drawCells)
-//   - local x scale: day of month (d.date.getDate()) -> [0, cell width]
-//   - y scale: temperature -> [cell height, 0], shared across all cells
-//   - d3.line() to build a path for the daily max and one for the daily min
-//   - give the paths pointer-events: none so the tooltip still works
-export function drawMiniCharts(chart, data, scales) {}
+export function drawMiniCharts(chart, data, scales) {
+  const cellWidth = scales.yearScale.bandwidth();
+  const cellHeight = scales.monthScale.bandwidth();
+  const allDays = data.flatMap((d) => d.days);
+
+  const dayScale = d3
+    .scaleLinear()
+    .domain([1, 31])
+    .range([miniChartPadding, cellWidth - miniChartPadding]);
+  const tempScale = d3
+    .scaleLinear()
+    .domain([
+      d3.min(allDays, (day) => day.min),
+      d3.max(allDays, (day) => day.max),
+    ])
+    .range([cellHeight - miniChartPadding, miniChartPadding]);
+
+  const maxLine = d3
+    .line()
+    .x((day) => dayScale(day.date.getDate()))
+    .y((day) => tempScale(day.max));
+  const minLine = d3
+    .line()
+    .x((day) => dayScale(day.date.getDate()))
+    .y((day) => tempScale(day.min));
+
+  const groups = chart
+    .selectAll(".mini-chart")
+    .data(data)
+    .join("g")
+    .attr("class", "mini-chart")
+    .attr(
+      "transform",
+      (d) =>
+        `translate(${scales.yearScale(d.year)}, ${scales.monthScale(d.month)})`,
+    );
+
+  groups
+    .append("path")
+    .attr("class", "max-line")
+    .attr("d", (d) => maxLine(d.days));
+  groups
+    .append("path")
+    .attr("class", "min-line")
+    .attr("d", (d) => minLine(d.days));
+}

@@ -13,3 +13,4 @@ export const legendHeight = chartHeight / 2;
 
 // Level 2: number of most recent years to show
 export const recentYears = 10;
+export const miniChartPadding = 4;
