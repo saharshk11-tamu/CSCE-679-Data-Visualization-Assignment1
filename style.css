@@ -1,4 +1,73 @@
 /* For debugging */
+/*
 svg {
   outline: 1px solid red;
+}
+*/
+
+/* Positioning context so the toggle button can sit over the svg */
+#chart {
+  position: relative;
+}
+
+/* Chart title */
+.chart-title {
+  font-family: system-ui, sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  fill: #222;
+}
+
+/* Legend end labels */
+.legend-label {
+  font-family: system-ui, sans-serif;
+  font-size: 12px;
+  fill: #222;
+}
+
+/* Max/min toggle button, placed beside the title */
+.toggle-button {
+  position: absolute;
+  transform: translateY(-50%); /* vertically center on the title */
+  padding: 6px 14px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    filter 0.15s;
+}
+
+/* Fill color shows the current mode */
+.toggle-button.mode-max {
+  background: #bd0026; /* hot red: showing max temperatures */
+}
+
+.toggle-button.mode-min {
+  background: #2b6cb0; /* cool blue: showing min temperatures */
+}
+
+.toggle-button:hover {
+  filter: brightness(0.9);
+}
+
+.toggle-button:focus-visible {
+  outline: 2px solid #fd8d3c;
+  outline-offset: 2px;
+}
+
+/* Tooltip on hover styling */
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0;
+  background: ghostwhite;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 10px;
 }

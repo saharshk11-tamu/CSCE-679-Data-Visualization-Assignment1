@@ -21,14 +21,15 @@ function render(data, scales, svg, chart) {
   updateColors(cells, scales.colorScale, mode);
 
   drawAxes(chart, scales);
-  drawTitle(svg);
+  const title = drawTitle(svg);
   drawLegend(svg, scales.colorScale);
   setupTooltip(cells);
 
   // Toggle only recolors the existing cells, it never redraws
-  setupToggle(() => {
+  setupToggle(title, () => {
     mode = mode === "max" ? "min" : "max";
     updateColors(cells, scales.colorScale, mode);
+    return mode;
   });
 }
 

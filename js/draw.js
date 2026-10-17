@@ -1,4 +1,11 @@
-import { containerSelector, width, height, margin } from "./config.js";
+import {
+  containerSelector,
+  width,
+  height,
+  margin,
+  legendWidth,
+  legendHeight,
+} from "./config.js";
 
 // Create SVG
 export function createSVG() {
@@ -16,52 +23,133 @@ export function createSVG() {
 }
 
 // Draw one rect per month (the heatmap cells).
-// TODO:
-//   - data join: chart.selectAll(...).data(data).join("rect")
-//   - x / y from yearScale(d.year) / monthScale(d.month)
-//   - width / height from each scale's bandwidth()
-//   - do NOT set fill here; updateColors handles that
-// Returns: the cells selection, so other functions can recolor / attach events.
-export function drawCells(chart, data, scales) {}
+export function drawCells(chart, data, scales) {
+  const cells = chart
+    .selectAll(".cell")
+    .data(data)
+    .join("rect")
+    .attr("class", "cell")
+    .attr("x", (d) => scales.yearScale(d.year))
+    .attr("width", scales.yearScale.bandwidth())
+    .attr("y", (d) => scales.monthScale(d.month))
+    .attr("height", scales.monthScale.bandwidth());
+
+  return cells;
+}
 
 // Recolor existing cells for the current mode ("max" or "min").
-// TODO:
-//   - set each cell's fill using colorScale and the value for `mode`
-//     (hint: the mode string matches the data field name)
-export function updateColors(cells, colorScale, mode) {}
+export function updateColors(cells, colorScale, mode) {
+  cells
+    .transition()
+    .duration(500)
+    .attr("fill", (d) => colorScale(d[mode]));
+}
 
 // Draw the year axis (top) and month axis (left).
-// TODO:
-//   - year axis: d3.axisTop(yearScale), appended in a <g> at y = 0
-//   - month axis: d3.axisLeft(monthScale), with tickFormat turning 0-11
-//     into month names
-//   - remember: .call(axis) on a <g> is how an axis gets drawn
-export function drawAxes(chart, scales) {}
+export function drawAxes(chart, scales) {
+  const xAxis = d3.axisTop(scales.yearScale);
+  chart.append("g").call(xAxis);
+
+  const timeFormat = d3.timeFormat("%B");
+  const yAxis = d3
+    .axisLeft(scales.monthScale)
+    .tickFormat((d) => timeFormat(new Date(2000, d, 1)));
+  chart.append("g").call(yAxis);
+}
 
 // Draw the chart title.
-// TODO:
-//   - append a <text> above the plot area (inside margin.top)
-//   - decide: append to svg (full-svg coords) or chart (inner coords)
-export function drawTitle(svg) {}
+// Returns: the title selection, so the toggle button can be placed beside it.
+export function drawTitle(svg) {
+  return svg
+    .append("text")
+    .attr("class", "chart-title")
+    .attr("x", width / 2)
+    .attr("y", margin.top / 2)
+    .attr("text-anchor", "middle")
+    .text("Monthly Temperature in Hong Kong");
+}
 
 // Draw the color legend mapping colors to temperatures.
-// TODO:
-//   - place it in the right margin (or wherever you leave room)
-//   - show a color gradient or color steps plus temperature labels
-//   - hint: a small scale + axis next to the colors works well for labels
-export function drawLegend(svg, colorScale) {}
+export function drawLegend(svg, colorScale) {
+  const [minTemp, maxTemp] = colorScale.domain();
+  const legend = svg
+    .append("g")
+    .attr(
+      "transform",
+      `translate(${width - margin.right + margin.right / 2}, ${margin.top})`,
+    );
+
+  // One swatch per quantized color, stacked cold (top) to hot (bottom)
+  const colors = colorScale.range();
+  const swatchHeight = legendHeight / colors.length;
+
+  legend
+    .selectAll(".legend-swatch")
+    .data(colors)
+    .join("rect")
+    .attr("class", "legend-swatch")
+    .attr("x", 0)
+    .attr("y", (d, i) => i * swatchHeight)
+    .attr("width", legendWidth)
+    .attr("height", swatchHeight - 1) // 1px gap between swatches
+    .attr("fill", (d) => d);
+
+  // End labels, centered above and below the swatch column
+  legend
+    .append("text")
+    .attr("class", "legend-label")
+    .attr("x", legendWidth / 2)
+    .attr("y", -8)
+    .attr("text-anchor", "middle")
+    .text(`${minTemp} Celsius`);
+
+  legend
+    .append("text")
+    .attr("class", "legend-label")
+    .attr("x", legendWidth / 2)
+    .attr("y", legendHeight + 4)
+    .attr("text-anchor", "middle")
+    .attr("dominant-baseline", "hanging") // y marks the top of the text
+    .text(`${maxTemp} Celsius`);
+}
 
 // Show date and temperatures when hovering over a cell.
-// TODO:
-//   - create a tooltip element once (an HTML <div> is easiest)
-//   - on cells: mouseover/mousemove -> fill text + position it,
-//     mouseout -> hide it
-//   - format to match the reference: "Date: 2002-03; max: 28 min: 14"
-export function setupTooltip(cells) {}
+export function setupTooltip(cells) {
+  const tooltip = d3.select("body").append("div").attr("class", "tooltip");
 
-// Wire up the max/min toggle.
-// TODO:
-//   - decide the trigger: a <button> (in index.html or created with d3),
-//     or clicking the chart itself
-//   - on click, call onToggle() and update any button label
-export function setupToggle(onToggle) {}
+  cells
+    .on("mouseover", (event, d) => {
+      tooltip.style("opacity", 1);
+      // month is 0-based; +1 and zero-pad so March shows as "03"
+      const month = String(d.month + 1).padStart(2, "0");
+      tooltip.text(`Date: ${d.year}-${month}; max: ${d.max} min: ${d.min}`);
+    })
+    .on("mousemove", (event) => {
+      tooltip.style("left", event.pageX + 10 + "px");
+      tooltip.style("top", event.pageY + 10 + "px");
+    })
+    .on("mouseout", () => {
+      tooltip.style("opacity", 0);
+    });
+}
+
+// Wire up the max/min toggle, placed just right of the title.
+export function setupToggle(title, onToggle) {
+  const titleBox = title.node().getBBox();
+
+  const button = d3
+    .select(containerSelector)
+    .append("button")
+    .attr("class", "toggle-button mode-max")
+    .style("left", `${titleBox.x + titleBox.width + 16}px`)
+    .style("top", `${titleBox.y + titleBox.height / 2}px`)
+    .text("Switch to min");
+
+  button.on("click", () => {
+    const newMode = onToggle();
+    button
+      .text(`Switch to ${newMode === "max" ? "min" : "max"}`)
+      .classed("mode-max", newMode === "max")
+      .classed("mode-min", newMode === "min");
+  });
+}

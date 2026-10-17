@@ -13,12 +13,10 @@ export function getScales(data) {
     .domain(d3.range(0, 12))
     .range([0, chartHeight])
     .padding(0.2);
-  const minTempExtent = d3.extent(data, (d) => d.min);
-  const maxTempExtent = d3.extent(data, (d) => d.max);
-  const tempExtent = [minTempExtent[0], maxTempExtent[1]];
   const colorScale = d3
-    .scaleSequential(d3.interpolateYlOrRd)
-    .domain(tempExtent);
+    .scaleQuantize()
+    .domain([0, 40])
+    .range(d3.schemeSpectral[11].slice(0, 11).reverse());
 
   return { yearScale, monthScale, colorScale };
 }
