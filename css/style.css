@@ -25,21 +25,43 @@ svg {
   fill: #222;
 }
 
-/* Max/min toggle button, placed beside the title */
-.toggle-button {
+/* Button row (toggle + level link), placed beside the title */
+.controls {
   position: absolute;
   transform: translateY(-50%); /* vertically center on the title */
+  display: flex;
+  gap: 8px;
+}
+
+/* Shared button shape */
+.toggle-button,
+.level-button {
   padding: 6px 14px;
   font-family: system-ui, sans-serif;
   font-size: 13px;
   font-weight: 500;
-  color: #fff;
-  border: none;
   border-radius: 999px;
   cursor: pointer;
   transition:
     background 0.3s,
     filter 0.15s;
+}
+
+.toggle-button:hover,
+.level-button:hover {
+  filter: brightness(0.9);
+}
+
+.toggle-button:focus-visible,
+.level-button:focus-visible {
+  outline: 2px solid #fd8d3c;
+  outline-offset: 2px;
+}
+
+/* Max/min toggle */
+.toggle-button {
+  color: #fff;
+  border: none;
 }
 
 /* Fill color shows the current mode */
@@ -51,13 +73,11 @@ svg {
   background: #2b6cb0; /* cool blue: showing min temperatures */
 }
 
-.toggle-button:hover {
-  filter: brightness(0.9);
-}
-
-.toggle-button:focus-visible {
-  outline: 2px solid #fd8d3c;
-  outline-offset: 2px;
+/* Level link: neutral so it doesn't compete with the mode colors */
+.level-button {
+  color: #333;
+  background: #fff;
+  border: 1.5px solid #bbb;
 }
 
 /* Tooltip on hover styling */

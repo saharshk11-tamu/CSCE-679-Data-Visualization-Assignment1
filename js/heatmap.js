@@ -132,24 +132,3 @@ export function setupTooltip(cells) {
       tooltip.style("opacity", 0);
     });
 }
-
-// Wire up the max/min toggle, placed just right of the title.
-export function setupToggle(title, onToggle) {
-  const titleBox = title.node().getBBox();
-
-  const button = d3
-    .select(containerSelector)
-    .append("button")
-    .attr("class", "toggle-button mode-max")
-    .style("left", `${titleBox.x + titleBox.width + 16}px`)
-    .style("top", `${titleBox.y + titleBox.height / 2}px`)
-    .text("Switch to min");
-
-  button.on("click", () => {
-    const newMode = onToggle();
-    button
-      .text(`Switch to ${newMode === "max" ? "min" : "max"}`)
-      .classed("mode-max", newMode === "max")
-      .classed("mode-min", newMode === "min");
-  });
-}

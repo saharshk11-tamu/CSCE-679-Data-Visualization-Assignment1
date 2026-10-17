@@ -1,6 +1,6 @@
 // Shared configuration: tweak layout and data settings here.
 
-export const dataPath = "temperature_daily.csv";
+export const dataPath = "data/temperature_daily.csv";
 export const containerSelector = "#chart";
 
 export const width = 1400;
@@ -10,3 +10,6 @@ export const chartWidth = width - margin.left - margin.right;
 export const chartHeight = height - margin.top - margin.bottom;
 export const legendWidth = 20;
 export const legendHeight = chartHeight / 2;
+
+// Level 2: number of most recent years to show
+export const recentYears = 10;

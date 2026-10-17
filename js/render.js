@@ -1,18 +1,16 @@
-import { getData, processData } from "./js/data.js";
-import { getScales } from "./js/scales.js";
 import {
-  createSVG,
   drawCells,
   updateColors,
   drawAxes,
   drawTitle,
   drawLegend,
   setupTooltip,
-  setupToggle,
-} from "./js/draw.js";
+} from "./heatmap.js";
+import { createControls, setupToggle, setupLevelLink } from "./controls.js";
 
 // Draw every part of the heatmap once, then handle toggling.
-function render(data, scales, svg, chart) {
+// Shared by both levels; linkedLevel is the page the level button goes to.
+export function render(data, scales, svg, chart, linkedLevel) {
   // Current temperature shown: "max" or "min" (matches the data field names)
   let mode = "max";
 
@@ -26,21 +24,11 @@ function render(data, scales, svg, chart) {
   setupTooltip(cells);
 
   // Toggle only recolors the existing cells, it never redraws
-  setupToggle(title, () => {
+  const controls = createControls(title);
+  setupToggle(controls, () => {
     mode = mode === "max" ? "min" : "max";
     updateColors(cells, scales.colorScale, mode);
     return mode;
   });
+  setupLevelLink(controls, linkedLevel);
 }
-
-// main function
-async function main() {
-  const rawData = await getData();
-  const data = processData(rawData);
-  const scales = getScales(data);
-  const { svg, chart } = createSVG();
-
-  render(data, scales, svg, chart);
-}
-
-main();
